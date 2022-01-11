@@ -33,12 +33,21 @@ function App() {
     })
   }
 
+  function handleLogout() {
+    fetch('/login', {
+      method: 'DELETE'
+    })
+    .then(() => setUser(null))
+  }
+
   return (
     <div className="App">
 
       <p>{user?.name || "Logged Out"}</p>
 
       <button type="button" onClick={handleLogin}>Login</button>
+
+      <button type="button" onClick={handleLogout}>Logout</button>
 
       <button type="button" onClick={() => setChatOpen(prev => !prev)}>{chatOpen ? "Close Chat" : "Open Chat"}</button>
 
