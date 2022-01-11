@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :messages
   get "/me", to: "users#show"
   post "/login", to: "sessions#create"
   delete "/login", to: "sessions#destroy"
