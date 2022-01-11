@@ -1,24 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import consumer from './consumer-service'
+import ChatRoom from './ChatRoom'
 
 function App() {
 
-  // STATE //
-
-  // current user
   const [user, setUser] = useState(null)
-  // subscribed channel
-  const [channel, setChannel] = useState(null)
-  // messages from server
-  const [messages, setMessages] = useState([])
-  // form input
-  const [messageInput, setMessageInput] = useState('')
+  const [chatOpen, setChatOpen] = useState(null)
 
-  console.log(messages);
-
-  // EFFECTS //
-
-  // set users through sessions/cookies
   useEffect(() => {
     fetch('/me')
     .then(res => res.json())
@@ -27,30 +14,6 @@ function App() {
         setUser(data)
       }
     })
-  }, [])
-
-  // set chat channel when logged in (can also happen when chat component mounts)
-  useEffect(() => {
-    if (user && !channel) {
-
-      fetch('/messages')
-      .then(res => res.json())
-      .then(messages => {
-        setMessages(prev => [...messages, ...prev])
-      })
-
-      const chatChannel = consumer.subscriptions.create({ channel: "ChatChannel", room: "Red Room" }, {
-        received(data) {
-          addToMessages(data)
-        }
-      })
-      setChannel(chatChannel)
-    }
-  }, [user])
-
-  // cleanup effect to unsubscribe chat channel
-  useEffect(() => {
-    // return channel?.unsubscribe()
   }, [])
 
   function handleLogin() {
@@ -70,26 +33,6 @@ function App() {
     })
   }
 
-  function handleValidateToken() {
-    fetch('/validate')
-    .then(res => res.json())
-    .then(data => console.log(data))
-  }
-
-  function addToMessages(data) {
-    setMessages(prev => [...prev, data])
-  }
-
-  function handleMessageInputChange(e) {
-    setMessageInput(e.target.value)
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault()
-    channel.send({body: messageInput})
-    setMessageInput('')
-  }
-
   return (
     <div className="App">
 
@@ -97,21 +40,10 @@ function App() {
 
       <button type="button" onClick={handleLogin}>Login</button>
 
-      <button type="button" onClick={handleValidateToken}>Validate Login</button>
+      <button type="button" onClick={() => setChatOpen(prev => !prev)}>{chatOpen ? "Close Chat" : "Open Chat"}</button>
 
-      <div>
+      {chatOpen ? <ChatRoom user={user} /> : null}
 
-        <form onSubmit={handleSubmit}>
-
-          <input type="text" value={messageInput} onChange={handleMessageInputChange} />
-
-        </form>
-
-        <h3>Messages:</h3>
-
-        {messages.map(m => <p>{m.user?.name ? `${m.user?.name}: ` : null} {m.content}</p>)}
-
-      </div>
     </div>
   );
 }

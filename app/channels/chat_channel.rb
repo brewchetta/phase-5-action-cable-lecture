@@ -7,7 +7,7 @@ class ChatChannel < ApplicationCable::Channel
 
   def receive(data)
     new_message = current_user.messages.create(content: data['body'])
-    ActionCable.server.broadcast("chat_#{params[:room]}", new_message)
+    ActionCable.server.broadcast("chat_#{params[:room]}", {content: new_message.content, user: new_message.user})
   end
 
   def unsubscribed
